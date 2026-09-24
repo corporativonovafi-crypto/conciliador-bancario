@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conciliación bancaria</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 2.5rem 1rem 4rem;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #0b1220 0%, #1a2436 100%);
+    color: #f1f5f9; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 1180px; }
+  a.back { color: #94a3b8; text-decoration: none; font-size: 0.82rem; }
+  a.back:hover { color: #d4af37; }
+  h1 { font-size: 1.55rem; margin: 0.9rem 0 0.35rem; }
+  h2 { font-size: 1rem; margin: 0 0 0.7rem; }
+  p.sub { color: #94a3b8; font-size: 0.87rem; line-height: 1.5; margin: 0 0 1.1rem; max-width: 82ch; }
+  .priv {
+    display: flex; gap: 0.55rem; align-items: flex-start; background: #14202e;
+    border: 1px solid #2c3746; border-radius: 12px; padding: 0.8rem 1rem;
+    font-size: 0.8rem; color: #a8b6c8; margin-bottom: 1.4rem; line-height: 1.45;
+  }
+  .grid2 { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+  .side { background: #131d2b; border: 1px solid #2c3746; border-radius: 14px; padding: 1rem 1.1rem; }
+  .side h3 { margin: 0 0 0.6rem; font-size: 0.92rem; }
+  .side h3 span { color: #8b95a5; font-weight: 400; font-size: 0.78rem; }
+  .drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.3rem; text-align: center; border: 1.5px dashed #3a4658; border-radius: 12px;
+    background: #0f1826; padding: 1.1rem 0.9rem; cursor: pointer; transition: 0.15s;
+  }
+  .drop:hover, .drop.over { border-color: #d4af37; background: #17202f; }
+  .drop strong { font-size: 0.86rem; }
+  .drop span { font-size: 0.72rem; color: #8b95a5; }
+  .drop.loaded { border-style: solid; border-color: #3f6b4a; }
+  .btn {
+    border: 1px solid #d4af37; background: #d4af37; color: #1a1408; font-size: 0.8rem;
+    font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 9px; cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; color: #d4af37; }
+  .btn.ghost:hover { background: #241f10; }
+  .btn.big { font-size: 0.9rem; padding: 0.65rem 1.3rem; }
+  .status { margin-top: 0.6rem; font-size: 0.79rem; color: #94a3b8; min-height: 1.1rem; }
+  .status.err { color: #fca5a5; }
+  .status.ok { color: #8fd6a3; }
+  details { margin-top: 0.6rem; border: 1px solid #2c3746; border-radius: 10px; background: #101a27; padding: 0.5rem 0.75rem; }
+  details summary { cursor: pointer; font-size: 0.76rem; color: #94a3b8; }
+  details pre { margin: 0.5rem 0 0; max-height: 220px; overflow: auto; font-size: 0.7rem; line-height: 1.5; color: #b6c2d2; white-space: pre-wrap; word-break: break-word; }
+  details .meta { font-size: 0.73rem; color: #8b95a5; margin-top: 0.5rem; line-height: 1.6; }
+  .mapGrid { display: grid; gap: 0.5rem; grid-template-columns: repeat(3, 1fr); margin-top: 0.6rem; }
+  .fld label { display: block; font-size: 0.64rem; color: #8b95a5; margin-bottom: 0.22rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  select, input[type="text"] { width: 100%; background: #0e1725; border: 1px solid #2c3746; color: #f1f5f9; border-radius: 8px; padding: 0.38rem; font-size: 0.76rem; outline: none; }
+  select:focus { border-color: #d4af37; }
+  .options {
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+    background: #131d2b; border: 1px solid #2c3746; border-radius: 14px;
+    padding: 0.9rem 1.1rem; margin-top: 1rem;
+  }
+  .options .fld { min-width: 150px; }
+  section { margin-top: 1.6rem; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.9rem; }
+  .tile { background: #131d2b; border: 1px solid #2c3746; border-radius: 10px; padding: 0.55rem 0.9rem; font-size: 0.73rem; color: #94a3b8; }
+  .tile b { color: #f1f5f9; display: block; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+  .tile.good { border-color: #3f6b4a; }
+  .tile.warn { border-color: #6b5a20; }
+  .tile.bad { border-color: #6b3030; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.9rem; align-items: center; }
+  .check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.78rem; color: #a8b6c8; }
+  .tableWrap { overflow: auto; max-height: 620px; border: 1px solid #2c3746; border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.77rem; }
+  th {
+    position: sticky; top: 0; background: #1b2636; color: #cbd5e1; text-align: left;
+    padding: 0.5rem 0.65rem; font-weight: 600; white-space: nowrap; border-bottom: 1px solid #2c3746; z-index: 2;
+  }
+  th.grp { background: #223047; text-align: center; }
+  td { padding: 0.45rem 0.65rem; border-bottom: 1px solid #1f2a3a; white-space: nowrap; }
+  td.desc { white-space: normal; min-width: 20ch; max-width: 32ch; color: #cbd5e1; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.est-conciliado td:first-child { border-left: 3px solid #4f9e63; }
+  tr.est-posible td:first-child { border-left: 3px solid #d4af37; background: #1d1a10; }
+  tr.est-solo-banco td:first-child { border-left: 3px solid #c9614f; background: #1e1412; }
+  tr.est-solo-libros td:first-child { border-left: 3px solid #5b8fd0; background: #121a24; }
+  .tag { font-size: 0.7rem; padding: 0.12rem 0.45rem; border-radius: 999px; border: 1px solid #3a4658; color: #cbd5e1; }
+  .warns { margin-top: 0.9rem; font-size: 0.76rem; color: #f0d48a; background: #241f10; border: 1px solid #6b5a20; border-radius: 10px; padding: 0.7rem 0.95rem; line-height: 1.55; }
+  .warns ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+  .empty { padding: 1.3rem; color: #8b95a5; font-size: 0.82rem; text-align: center; line-height: 1.6; }
+  .boot {
+    background: #3a1d1d; border: 1px solid #a1412f; border-radius: 12px;
+    padding: 0.85rem 1rem; margin-bottom: 1.2rem; font-size: 0.82rem;
+    line-height: 1.5; color: #ffd9d1; display: flex; flex-direction: column; gap: 0.35rem;
+  }
+  .boot[hidden] { display: none; }
+  .boot .hint { color: #e8b3a7; font-size: 0.76rem; }
+  footer { margin-top: 2.2rem; font-size: 0.72rem; color: #64748b; line-height: 1.6; } font-size: 0.72rem; color: #64748b; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="boot" id="bootError" hidden>
+    <strong>&#9888;&#65039; Algo fall&oacute; al iniciar la herramienta</strong>
+    <span class="msg"></span>
+    <span class="hint">Recarga con Ctrl+F5 (Cmd+Shift+R en Mac) para descartar la versi&oacute;n guardada en cach&eacute;. Si sigue igual, m&aacute;ndame una foto de este aviso.</span>
+  </div>
+
+  <a class="back" href="/">&larr; Volver a Mis Herramientas Fiscales</a>
+  <h1>Conciliación bancaria</h1>
+  <p class="sub">
+    Sube el estado de cuenta del banco y el auxiliar (o pólizas) de la cuenta de bancos.
+    La herramienta cruza los movimientos por <strong>importe y cercanía de fecha</strong> y te
+    deja ver qué quedó conciliado, qué está solo en el banco y qué está solo en libros.
+  </p>
+  <div class="priv">
+    <span>&#128274;</span>
+    <span>
+      <strong>Los archivos no salen de tu navegador.</strong> No se suben a ningún servidor
+      ni se envían a la IA. Al recargar la página todo desaparece.
+    </span>
+  </div>
+
+  <div class="grid2">
+    <div class="side">
+      <h3>1) Banco <span>— estado de cuenta</span></h3>
+      <label class="drop" id="dropBanco">
+        <input type="file" id="fileBanco" accept=".xlsx,.xls,.csv,.txt,.pdf" hidden />
+        <strong>Suelta el estado de cuenta</strong>
+        <span>Excel, CSV o PDF del banco</span>
+      </label>
+      <div class="status" id="statusBanco"></div>
+      <div id="extraBanco"></div>
+    </div>
+    <div class="side">
+      <h3>2) Libros <span>— auxiliar de bancos</span></h3>
+      <label class="drop" id="dropLibros">
+        <input type="file" id="fileLibros" accept=".xlsx,.xls,.csv,.txt,.pdf" hidden />
+        <strong>Suelta el auxiliar de libros</strong>
+        <span>Excel, CSV o PDF del sistema contable</span>
+      </label>
+      <div class="status" id="statusLibros"></div>
+      <div id="extraLibros"></div>
+    </div>
+  </div>
+
+  <div class="options">
+    <div class="fld">
+      <label>Tolerancia de fecha</label>
+      <select id="dateTol">
+        <option value="0">Mismo día</option>
+        <option value="1">± 1 día</option>
+        <option value="2">± 2 días</option>
+        <option value="3" selected>± 3 días</option>
+        <option value="5">± 5 días</option>
+        <option value="7">± 7 días</option>
+        <option value="10">± 10 días</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Tolerancia de importe</label>
+      <select id="amtTol">
+        <option value="0">Exacto</option>
+        <option value="0.01" selected>± $0.01</option>
+        <option value="0.5">± $0.50</option>
+        <option value="1">± $1.00</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Signo en libros</label>
+      <select id="signoLibros">
+        <option value="espejo" selected>Espejo (lo normal)</option>
+        <option value="mismo">Mismo sentido que el banco</option>
+      </select>
+    </div>
+    <div>
+      <button class="btn big" id="runBtn">Conciliar</button>
+    </div>
+  </div>
+
+  <section id="resultPanel" hidden>
+    <h2>Resultado</h2>
+    <div class="tiles" id="tiles"></div>
+    <div class="actions">
+      <button class="btn" id="dlXlsx">Descargar Excel</button>
+      <button class="btn ghost" id="dlCsv">Descargar CSV</button>
+      <label class="check"><input type="checkbox" id="onlyDiff" /> Ver solo diferencias</label>
+    </div>
+    <div class="tableWrap" id="tableWrap"></div>
+    <div class="warns" id="warns" hidden></div>
+  </section>
+
+  <footer>
+    El cruce es determinista: no usa IA, así que no puede inventar cifras. Los archivos se
+    procesan completos en tu equipo.<br />
+    Eliezer Do&ntilde;o Andrade &middot; Contador Corporativo
+  </footer>
+</div>
+
+<script>
+  /* Vigilante de arranque: si algo falla al iniciar, avisa en pantalla en vez
+     de dejar la pagina muda. */
+  (function () {
+    function show(msg) {
+      var el = document.getElementById("bootError");
+      if (!el) return;
+      el.hidden = false;
+      var m = el.querySelector(".msg");
+      if (m && m.textContent !== msg) m.textContent = msg;
+    }
+    window.__fiscalFallo = show;
+    window.addEventListener("error", function (e) {
+      if (e && e.target && e.target.tagName === "SCRIPT") {
+        show("No se pudo cargar una libreria externa (se necesita internet). Revisa tu conexion y recarga la pagina.");
+      }
+    }, true);
+    window.addEventListener("unhandledrejection", function () {
+      show("Ocurrio un error inesperado al iniciar la herramienta. Recarga la pagina.");
+    });
+    setTimeout(function () {
+      if (!window.__fiscalOk) {
+        show("La herramienta no termino de iniciar. Lo mas comun es que la pagina no se haya descargado completa desde el sitio, o que el navegador haya bloqueado los scripts.");
+      }
+    }, 3000);
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module">
+if (typeof XLSX === "undefined") {
+  window.__fiscalFallo("No se pudo cargar la libreria de Excel. Sin ella no se leen archivos .xlsx, .xls ni .csv. Revisa tu conexion a internet y recarga.");
+}
+
+/* ==== MOTOR:INICIO ==== */
+/* ============================================================
+   motor-fiscal.js
+   Motor compartido de "Mis Herramientas Fiscales".
+   - Lectura de estados de cuenta y analiticas: Excel, CSV y PDF,
+     de cualquier banco (no depende de espacios ni de un formato fijo).
+   - Limpieza de datos sensibles (CLABE, tarjeta, RFC, CURP, correo,
+     telefono, cuentas y referencias largas).
+   - Conciliacion bancaria contra libros.
+   Todo es determinista y corre en el navegador: ningun archivo sale
+   del equipo del usuario. No hace peticiones de red.
+   ============================================================ */
+
+/* ==== PURE:START ==== */
+/* Núcleo puro: no toca el DOM ni la red. Se prueba automáticamente. */
+
+function pad(n) { return String(n).padStart(2, "0"); }
+
+function norm(s) {
+  return String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+const MONTHS = { ene:1, feb:2, mar:3, abr:4, may:5, jun:6, jul:7, ago:8, sep:9, set:9, oct:10, nov:11, dic:12, jan:1, apr:4, aug:8, dec:12 };
+
+/* Fechas: ISO, dd/mm/aaaa, mm/dd/aaaa, dd-mmm-aa, dd/mmm/aaaa, dd-mmm-aa con
+   separador "/", "-", "." o espacio, y también sin año (dd/mmm, dd/mm). */
+const DATE_PATTERN = /(\d{4}-\d{2}-\d{2})|(\d{1,2}[/\-.]\d{1,2}[/\-.](\d{4}|\d{2}))|(\d{1,2}[/\-][A-Za-zÁÉÍÓÚáéíóúÑñ]{3,}[/\-](\d{4}|\d{2}))|(\d{1,2}[/\-][A-Za-zÁÉÍÓÚáéíóúÑñ]{3,})|(\d{1,2}\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]{3,}\s+(\d{4}|\d{2}))|(\d{1,2}[/\-]\d{1,2})(?!\d)/;
+
+function parseDate(raw) {
+  if (raw == null || raw === "") return null;
+  if (raw instanceof Date && !isNaN(raw.getTime())) {
+    return `${raw.getFullYear()}-${pad(raw.getMonth() + 1)}-${pad(raw.getDate())}`;
+  }
+  const s = String(raw).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  m = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/);
+  if (m) {
+    let y = +m[3]; if (y < 100) y += 2000;
+    let d = +m[1], mo = +m[2];
+    if (mo > 12 && d <= 12) { const t = d; d = mo; mo = t; }
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return `${y}-${pad(mo)}-${pad(d)}`;
+  }
+  m = s.match(/^(\d{1,2})[/\-.\s]([A-Za-zÁÉÍÓÚáéíóúÑñ]{3,})[/\-.\s](\d{2,4})/);
+  if (m) {
+    const mo = MONTHS[m[2].toLowerCase().slice(0, 3)];
+    let y = +m[3]; if (y < 100) y += 2000;
+    if (mo) return `${y}-${pad(mo)}-${pad(+m[1])}`;
+  }
+  return null;
+}
+
+function parseDatePartial(raw, defaultYear) {
+  const s = String(raw ?? "").trim();
+  let m = s.match(/^(\d{1,2})[/\-]([A-Za-zÁÉÍÓÚáéíóúÑñ]{3,})$/);
+  if (m) {
+    const mo = MONTHS[m[2].toLowerCase().slice(0, 3)];
+    if (mo) return `${defaultYear}-${pad(mo)}-${pad(+m[1])}`;
+  }
+  m = s.match(/^(\d{1,2})[/\-](\d{1,2})$/);
+  if (m) {
+    let d = +m[1], mo = +m[2];
+    if (mo > 12 && d <= 12) { const t = d; d = mo; mo = t; }
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return `${defaultYear}-${pad(mo)}-${pad(d)}`;
+  }
+  return null;
+}
+
+function dateIn(text, defaultYear) {
+  const s = String(text ?? "");
+  if (!s) return null;
+  const m = s.match(DATE_PATTERN);
+  if (!m) return null;
+  return parseDate(m[0]) || parseDatePartial(m[0], defaultYear || new Date().getFullYear());
+}
+
+function toMoney(raw) {
+  if (raw == null || raw === "") return null;
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+  const s0 = String(raw).trim();
+  if (!s0 || s0 === "-" || s0 === "\u2014") return null;
+  const neg = /^\(.*\)$/.test(s0) || /^-/.test(s0) || /-$/.test(s0);
+  let s = s0.replace(/[$MXN\s]/gi, "").replace(/[()]/g, "").replace(/^-/, "").replace(/-$/, "");
+  if (!/\d/.test(s)) return null;
+  const lc = s.lastIndexOf(","), ld = s.lastIndexOf(".");
+  if (lc > ld) s = s.replace(/\./g, "").replace(",", ".");
+  else s = s.replace(/,/g, "");
+  const n = Number(s);
+  if (!Number.isFinite(n)) return null;
+  return neg ? -n : n;
+}
+
+/* Un importe real lleva decimales o separador de miles. Así no confundimos
+   números de referencia, cuentas ni CLABE con cantidades. */
+const MONEY_RE = /^\(?\s*-?\s*\$?\s*\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?\s*\)?\s*-?$/;
+
+function isMoney(s) {
+  const t = String(s ?? "").trim();
+  if (!t || t.length > 20) return false;
+  if (!MONEY_RE.test(t)) return false;
+  if (/^\$/.test(t)) return true;
+  const core = t.replace(/[()\s-]/g, "");
+  return /[.,]\d{2}$/.test(core) || /\d,\d{3}/.test(core);
+}
+
+/* Marcas de cargo/abono. Las palabras completas solo cuentan como marca si
+   caen en la columna "TIPO" del banco; si no, son parte de la descripción
+   (p. ej. "PAGO TARJETA DE CREDITO"). */
+const FLAG_SHORT = /^(c|a|d|h|db|cr)$/i;
+const FLAG_WORD = /^(cargo|abono|debito|credito|retiro|deposito|car|abo)$/i;
+
+function isFlagToken(t, tipoCol) {
+  if (FLAG_SHORT.test(t.s)) return true;
+  if (!FLAG_WORD.test(t.s) || !tipoCol) return false;
+  const right = t.x + t.w;
+  return Math.abs(right - tipoCol.right) <= 45 ||
+    (t.x >= tipoCol.x - 25 && t.x <= tipoCol.right + 45);
+}
+
+/* Un número de cuenta, CLABE, RFC o correo nunca es un número de póliza. */
+function isSensitiveValue(s) {
+  const t = String(s ?? "").trim();
+  if (!t || t.length > 40) return true;
+  if (/^\d{13,}$/.test(t)) return true;
+  if (/\b\d{18}\b/.test(t)) return true;
+  if (/[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}/i.test(t)) return true;
+  if (/[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d/i.test(t)) return true;
+  if (/@/.test(t)) return true;
+  return false;
+}
+
+/* Un número de póliza/folio es un identificador corto con dígitos; una palabra
+   suelta de la descripción nunca lo es. */
+function isPolizaLike(s) {
+  const t = String(s ?? "").trim();
+  if (t.length < 2 || t.length > 24) return false;
+  if (/\s/.test(t)) return false;
+  if (!/\d/.test(t)) return false;
+  if (!/^[A-Za-z0-9][A-Za-z0-9\-/._]*$/.test(t)) return false;
+  return !isSensitiveValue(t);
+}
+
+const SENSITIVE = [
+  [/\b\d{12,}\b/g, "[omitido]"],
+  [/\b\d{18}\b/g, "[omitido]"],
+  [/\b(?:\d[ -]?){13,19}\b/g, "[omitido]"],
+  [/\b[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}\b/gi, "[omitido]"],
+  [/\b[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d\b/gi, "[omitido]"],
+  [/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[omitido]"],
+  [/\b(?:\+?52[\s-]?)?(?:\d[\s-]?){10}\b/g, "[omitido]"],
+  [/\b(?:cta|cuenta|clabe|tarjeta|contrato|convenio|sucursal)[\s.:#-]*\d[\d\s-]{4,}\b/gi, "[omitido]"],
+];
+
+function sanitize(text) {
+  let t = String(text ?? "").replace(/\s+/g, " ").trim();
+  for (const [re, rep] of SENSITIVE) t = t.replace(re, rep);
+  return t.replace(/\s+/g, " ").trim();
+}
+
+/* Renglones que no son movimientos (saldos, totales, periodos). */
+const SUMMARY_LINE = /saldo\s+(anterior|final|inicial|promedio|insoluto|disponible|del\s+periodo|al\s+corte)|saldo\s+al\s+\d|total\s+(de\s+)?(movimientos|cargos|abonos|periodo|general|importe)|total\s+importe|intereses?\s+(del\s+periodo|ganados|cobrados)|iva\s+del\s+periodo|periodo\s*:?\s*(del|de|desde)\s+\d|resumen\s+de\s+movimientos/i;
+
+/* Renglones de título o pie de página: nunca son descripción de un movimiento. */
+const NOISE_LINE = /^(p[aá]gina|pag\.|hoja)\s*\d|^banco\s|estado\s+de\s+cuenta|^no\.?\s*cliente|^sucursal|^cliente\s*:|^\d+\s*(de|\/)\s*\d+$|^total\b|^subtotal\b|^contin[uú]a/i;
+
+/* ------------------------- lectura de tablas (Excel/CSV) ------------------------- */
+
+const PAT = {
+  poliza: /poliza|folio|numero de documento|referencia|documento/i,
+  tipo: /^\s*(tipo|naturaleza|c\/a|a\/c|d\/h|h\/d|car\/abo|abo\/car)/i,
+  cargo: /cargo|retiro|debito|egreso|disposicion|cheques?/i,
+  abono: /abono|deposito|credito|ingreso|remesa/i,
+  fecha: /fecha|f\.\s*op/i,
+  monto: /importe|monto|operacion/i,
+  desc: /descripcion|concepto|detalle|movimiento|beneficiario|contraparte|ordenante|termino/i,
+};
+const COMBO = /cargos?\s*[\/y,]\s*abonos?|abonos?\s*[\/y,]\s*cargos?|depositos?\s*y\s*retiros?|retiros?\s*y\s*depositos?/i;
+
+function detectMap(headers) {
+  const map = { fecha: -1, desc: -1, cargo: -1, abono: -1, poliza: -1, tipo: -1, monto: -1 };
+  headers.forEach((h, i) => {
+    const s = norm(h);
+    if (!s) return;
+    if (map.monto < 0 && COMBO.test(s)) { map.monto = i; return; }
+    if (map.cargo < 0 && PAT.cargo.test(s) && !PAT.abono.test(s)) { map.cargo = i; return; }
+    if (map.abono < 0 && PAT.abono.test(s)) { map.abono = i; return; }
+    if (map.poliza < 0 && PAT.poliza.test(s)) { map.poliza = i; return; }
+    if (map.tipo < 0 && PAT.tipo.test(s)) { map.tipo = i; return; }
+    if (map.fecha < 0 && PAT.fecha.test(s)) { map.fecha = i; return; }
+    if (map.monto < 0 && PAT.monto.test(s)) { map.monto = i; return; }
+    if (map.desc < 0 && PAT.desc.test(s)) { map.desc = i; return; }
+  });
+  return map;
+}
+
+function findHeaderRow(matrix) {
+  let best = { idx: -1, score: 0, map: null };
+  const limit = Math.min(matrix.length, 30);
+  for (let i = 0; i < limit; i++) {
+    const row = (matrix[i] || []).map(norm);
+    const map = detectMap(row);
+    let score = 0;
+    if (map.fecha >= 0) score += 1;
+    if (map.desc >= 0) score += 1;
+    if (map.cargo >= 0 || map.abono >= 0 || map.monto >= 0) score += 1;
+    if (map.poliza >= 0) score += 0.5;
+    if (score > best.score) best = { idx: i, score, map };
+  }
+  return best.score >= 2 ? best : null;
+}
+
+function buildFromTable(headerRow, rows, map, year) {
+  const y = year || new Date().getFullYear();
+  const out = [];
+  let omitted = 0;
+  let prev = null;
+  for (const row of rows) {
+    if (!Array.isArray(row)) continue;
+    const cells = row.map((c) => (c instanceof Date ? c : (c ?? "")));
+    const filled = cells.map((c) => String(c).trim()).filter(Boolean);
+    if (!filled.length) { prev = null; continue; }
+    const joined = cells.join(" ");
+    if (SUMMARY_LINE.test(joined)) { omitted++; prev = null; continue; }
+    // Fecha completa, o día/mes sin año, como viene en muchos exportes.
+    const fecha = map.fecha >= 0
+      ? (parseDate(cells[map.fecha]) || parseDatePartial(cells[map.fecha], y))
+      : null;
+    if (!fecha) {
+      // Renglón de continuación de la descripción (sin fecha ni importe):
+      // se pega al movimiento anterior.
+      const hasAmount = filled.some((c) => isMoney(c));
+      const raw = map.desc >= 0 ? String(cells[map.desc] ?? "") : filled.join(" ");
+      const txt = sanitize(raw);
+      if (NOISE_LINE.test(txt)) { omitted++; prev = null; continue; }
+      if (prev && !hasAmount && filled.length <= 2 && raw.trim().length <= 90) {
+        if (txt && txt !== "[omitido]") {
+          prev.desc = sanitize(prev.desc ? `${prev.desc} ${txt}` : txt);
+        }
+        continue;
+      }
+      omitted++;
+      prev = null;
+      continue;
+    }
+    let cargo = 0, abono = 0;
+    if (map.cargo >= 0 || map.abono >= 0) {
+      cargo = Math.abs(toMoney(map.cargo >= 0 ? cells[map.cargo] : null) ?? 0);
+      abono = Math.abs(toMoney(map.abono >= 0 ? cells[map.abono] : null) ?? 0);
+    } else if (map.monto >= 0) {
+      const v = toMoney(cells[map.monto]);
+      if (v != null) {
+        const tipo = map.tipo >= 0 ? norm(cells[map.tipo]) : "";
+        const esCargo = v < 0 || /cargo|retiro|debito|d\/h|^d$/.test(tipo);
+        if (esCargo) cargo = Math.abs(v); else abono = Math.abs(v);
+      }
+    }
+    if (!cargo && !abono) { omitted++; prev = null; continue; }
+    const built = {
+      fecha,
+      desc: sanitize(map.desc >= 0 ? cells[map.desc] : ""),
+      cargo, abono,
+      poliza: map.poliza >= 0 ? String(cells[map.poliza] ?? "").trim() : "",
+    };
+    out.push(built);
+    prev = built;
+  }
+  return { rows: out, omitted };
+}
+
+/* ------------------------- motor para PDF ------------------------- */
+
+function median(nums) {
+  if (!nums.length) return 0;
+  const a = nums.slice().sort((x, y) => x - y);
+  return a[Math.floor(a.length / 2)];
+}
+
+/* Fragmentos de texto -> objetos con posición. */
+function normalizeItems(rawItems) {
+  const out = [];
+  for (const it of rawItems || []) {
+    const s = String(it && it.str != null ? it.str : "").replace(/\u00a0/g, " ");
+    if (!s.trim()) continue;
+    const tr = (it && it.transform) || [0, 0, 0, 0, 0, 0];
+    const h = Math.abs(Number(tr[3]) || Number(it.height) || 8);
+    out.push({
+      x: Number(tr[4]) || 0,
+      y: Number(tr[5]) || 0,
+      w: Math.abs(Number(it.width) || 0) || s.trim().length * h * 0.5,
+      h,
+      s: s.trim(),
+    });
+  }
+  return out;
+}
+
+/* Un fragmento puede contener toda la línea (PDF sin columnas separadas).
+   Lo partimos en palabras y estimamos la x de cada una. */
+function explodeItem(it) {
+  const parts = String(it.s).split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return [it];
+  const charW = it.s.length > 0 ? it.w / it.s.length : it.h * 0.5;
+  const out = [];
+  let cursor = 0;
+  for (const p of parts) {
+    const idx = String(it.s).indexOf(p, cursor);
+    cursor = idx + p.length;
+    out.push({ x: it.x + idx * charW, y: it.y, w: p.length * charW, h: it.h, s: p });
+  }
+  return out;
+}
+
+/* Agrupa fragmentos en renglones por su altura real, tolerando que las
+   columnas del mismo renglón tengan la y ligeramente distinta. */
+function groupIntoLines(items) {
+  const arr = items.slice().sort((a, b) => (b.y - a.y) || (a.x - b.x));
+  const medH = median(arr.map((i) => i.h).filter((h) => h > 0)) || 8;
+  const tol = Math.max(2, medH * 0.6);
+  const lines = [];
+  let cur = null;
+  for (const it of arr) {
+    if (cur && Math.abs(cur.mean - it.y) <= tol) {
+      cur.items.push(it);
+      cur.mean = (cur.mean * (cur.items.length - 1) + it.y) / cur.items.length;
+    } else {
+      cur = { mean: it.y, items: [it] };
+      lines.push(cur);
+    }
+  }
+  for (const l of lines) l.items.sort((a, b) => a.x - b.x);
+  return lines;
+}
+
+function lineTextOf(line) {
+  const medH = median(line.items.map((i) => i.h)) || 8;
+  const tol = Math.max(4, medH * 0.9);
+  let s = "", lastEnd = null;
+  for (const it of line.items) {
+    if (lastEnd !== null) s += (it.x - lastEnd) > tol ? " | " : " ";
+    s += it.s;
+    lastEnd = it.x + it.w;
+  }
+  return s.replace(/\s+/g, " ").replace(/ \| /g, " | ").trim();
+}
+
+const HEAD_PAT = [
+  ["fecha", /^(fecha|f\.?\s*operaci|fecha\s*operaci|fecha\s*de\s*(operaci|movimiento|aplicaci|corte))/i],
+  ["saldo", /^(saldo|liquidaci[oó]n)/i],
+  ["cargo", /^(cargo|retiro|d[eé]bito|debito|egreso|disposici|cheques)/i],
+  ["abono", /^(abono|dep[oó]sito|deposito|cr[eé]dito|credito|ingreso|remesa)/i],
+  ["importe", /^(importe|monto)/i],
+  ["tipo", /^(tipo|naturaleza)/i],
+  ["ref", /^(referencia|folio|documento|no\.|num|n[uú]mero|clave|autorizaci)/i],
+  ["desc", /^(concepto|descripci|detalle|movimiento|beneficiario)/i],
+];
+
+function colsOfLine(line) {
+  const cols = [];
+  for (const it of line.items) {
+    const seen = new Set();
+    const multiWord = it.s.trim().includes(" ");
+    for (const t of explodeItem(it)) {
+      const s = t.s.trim();
+      if (!s || s.length > 26) continue;
+      for (const [role, re] of HEAD_PAT) {
+        if (re.test(s) && !seen.has(role)) {
+          seen.add(role);
+          // Si el rótulo salió de una frase ("FECHA CONCEPTO CARGO ABONO") su
+          // posición no es fiable para alinear importes.
+          if (multiWord) { cols.push({ role, x: it.x, right: it.x + it.w, text: s, fuzzy: true }); break; }
+          // La columna toma la derecha del rótulo COMPLETO: los importes se
+          // alinean con la frase, no con la primera palabra
+          // (p. ej. "SALDO OPERACIÓN").
+          cols.push({ role, x: it.x, right: it.x + it.w, text: s });
+          break;
+        }
+      }
+    }
+  }
+  return cols;
+}
+
+function findHeaderCols(lines) {
+  let best = null;
+  for (let i = 0; i < lines.length; i++) {
+    const cols = colsOfLine(lines[i]);
+    const roles = new Set(cols.map((c) => c.role));
+    let score = roles.size;
+    if (roles.has("fecha")) score += 1;
+    if (roles.has("cargo") || roles.has("abono") || roles.has("importe")) score += 1;
+    if (!best || score > best.score) best = { score, cols, text: lineTextOf(lines[i]), idx: i };
+  }
+  if (!best || best.score < 3 || best.cols.length < 2) return null;
+  // Hay bancos que parten el encabezado en dos renglones
+  // ("FECHA" arriba y "OPER LIQ COD. DESCRIPCIÓN ... CARGOS ABONOS" abajo).
+  const merged = best.cols.slice();
+  const have = new Set(merged.map((c) => c.role));
+  const notes = [];
+  for (const j of [best.idx - 1, best.idx + 1]) {
+    const l = lines[j];
+    if (!l) continue;
+    if (l.items.some((it) => isMoney(it.s))) continue;              // es un renglón de datos
+    if (l.items.some((it) => it.s.length > 30)) continue;
+    for (const c of colsOfLine(l)) {
+      if (!have.has(c.role)) { merged.push(c); have.add(c.role); notes.push(c.role); }
+    }
+  }
+  return {
+    score: best.score, cols: merged, idx: best.idx,
+    text: lineTextOf(lines[best.idx]) + (notes.length ? ` (+ ${notes.join(", ")} del renglón contiguo)` : ""),
+  };
+}
+
+/* Columnas de importes: del encabezado si lo hay; si no, inferidas por
+   la posición real de los importes (la más a la derecha es el saldo). */
+function buildColumns(lines, header, explode) {
+  const split = explode || explodeItem;
+  if (header) {
+    const fromHeader = header.cols.filter((c) => ["cargo", "abono", "importe", "saldo"].includes(c.role));
+    if (fromHeader.length) return fromHeader;
+  }
+  const spots = [];
+  for (const l of lines) {
+    for (const it of l.items) {
+      for (const t of split(it)) if (isMoney(t.s)) spots.push(t.x + t.w);
+    }
+  }
+  spots.sort((a, b) => a - b);
+  const clusters = [];
+  for (const r of spots) {
+    const last = clusters[clusters.length - 1];
+    if (last && Math.abs(r - last.right) <= 16) { last.n += 1; last.sum += r; last.right = last.sum / last.n; }
+    else clusters.push({ n: 1, sum: r, right: r });
+  }
+  const solid = clusters.filter((c) => c.n >= 2);
+  if (solid.length >= 3) {
+    return solid.map((c, i) => ({
+      role: i === solid.length - 1 ? "saldo" : i === solid.length - 2 ? "abono" : "cargo",
+      x: c.right, right: c.right, text: "(inferida)",
+    }));
+  }
+  return solid.map((c) => ({ role: "importe", x: c.right, right: c.right, text: "(inferida)" }));
+}
+
+function roleOfSpot(m, numeric) {
+  let role = null, best = Infinity;
+  for (const c of numeric) {
+    const d = Math.abs(m.right - c.right);
+    if (d < best) { best = d; role = c.role; }
+  }
+  return best <= 26 ? role : null;
+}
+
+function addAmounts(row, money, numeric, invert) {
+  const flag = (money.find((m) => m.flag) || {}).flag || "";
+  const saldoCols = numeric.filter((c) => c.role === "saldo");
+  const movCols = numeric.filter((c) =>
+    (c.role === "cargo" || c.role === "abono" || c.role === "importe") && !c.fuzzy);
+  // Los saldos van SIEMPRE a la derecha de cargos y abonos: todo importe que
+  // quede más a la derecha que la última columna de movimiento es un saldo.
+  const rightmostMov = movCols.length ? Math.max(...movCols.map((c) => c.right)) : null;
+  const isBalance = (m) =>
+    saldoCols.some((c) => Math.abs(m.right - c.right) <= 26) ||
+    (rightmostMov !== null && m.right > rightmostMov + 26);
+  const values = [], saldos = [];
+  for (const m of money) {
+    if (m.v == null) continue;
+    if (isBalance(m)) saldos.push(m.v);
+    else values.push(m);
+  }
+  if (saldos.length) row.saldo = saldos[saldos.length - 1];
+  if (!values.length) return;
+  row.hasMoney = true;
+
+  const single = values.length === 1;
+  const role = single ? roleOfSpot(values[0], numeric) : null;
+
+  if (!single) {
+    const roles = values.map((m) => roleOfSpot(m, numeric));
+    if (roles.every(Boolean)) {
+      values.forEach((m, i) => {
+        const v = Math.abs(m.v);
+        if (roles[i] === "cargo") row.cargo += v;
+        else if (roles[i] === "abono") row.abono += v;
+      });
+      return;
+    }
+    const a = Math.abs(values[0].v), b = Math.abs(values[1].v);
+    if (invert) { row.abono += a; row.cargo += b; }
+    else { row.cargo += a; row.abono += b; }
+    return;
+  }
+
+  const v = Math.abs(values[0].v);
+  if (role === "cargo") { row.cargo += v; return; }
+  if (role === "abono") { row.abono += v; return; }
+  if (flag) {
+    if (/^(C|D|DB|CR|CAR|CARGO|DEBITO|RETIRO)$/i.test(flag)) row.cargo += v;
+    else row.abono += v;
+    return;
+  }
+  if (values[0].v < 0) { row.cargo += v; return; }
+  // Sin columna ni marca que lo distinga: se asume abono y se marca para
+  // resolverlo después con la variación del saldo, si el banco lo trae.
+  row.abono += v;
+  row.ambiguous = true;
+}
+
+/* Si el banco trae columna de saldo, la variación del saldo dice si el
+   movimiento fue cargo o abono. Solo corrige los renglones ambiguos y
+   únicamente cuando el saldo cuadra exactamente. */
+function refineWithSaldo(rows) {
+  const targets = rows.map((r, i) => ({ r, i })).filter((x) => x.r.ambiguous && x.r.saldo != null);
+  if (!targets.length) return 0;
+  const matches = (dir) => targets.filter(({ r, i }) => {
+    const prev = dir === "fwd" ? rows[i - 1] : rows[i + 1];
+    if (!prev || prev.saldo == null) return false;
+    const amount = r.cargo || r.abono;
+    return Math.abs(Math.abs(r.saldo - prev.saldo) - amount) < 0.02;
+  }).length;
+  const dir = matches("fwd") >= matches("rev") ? "fwd" : "rev";
+  let fixed = 0;
+  for (const { r, i } of targets) {
+    const prev = dir === "fwd" ? rows[i - 1] : rows[i + 1];
+    if (!prev || prev.saldo == null) continue;
+    const delta = r.saldo - prev.saldo;
+    const amount = r.cargo || r.abono;
+    if (Math.abs(Math.abs(delta) - amount) >= 0.02) continue;
+    if (delta < 0) { r.cargo = amount; r.abono = 0; } else { r.abono = amount; r.cargo = 0; }
+    r.ambiguous = false;
+    r.bySaldo = true;
+    fixed += 1;
+  }
+  return fixed;
+}
+
+/* Algunos PDF parten la fecha en dos fragmentos ("03/" + "AGO"). */
+function mergeDateSpill(tokens) {
+  const out = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i], n = tokens[i + 1];
+    const glued = n ? t.s + n.s : "";
+    const pairs = n && (
+      (/[/\-]$/.test(t.s) && /^[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}$/.test(n.s)) ||
+      (/^\d{1,2}$/.test(t.s) && /^[/\-][A-Za-zÁÉÍÓÚáéíóúÑñ]{3,}$/.test(n.s))
+    );
+    if (pairs && dateIn(glued, 1999)) {
+      out.push({ x: t.x, y: t.y, w: t.w + n.w, h: t.h, s: glued });
+      i += 1;
+      continue;
+    }
+    out.push(t);
+  }
+  return out;
+}
+
+function extractRowsFromLines(lines, ctx) {
+  const numeric = (ctx.cols || []).filter((c) => ["cargo", "abono", "importe", "saldo"].includes(c.role));
+  const refCol = ctx.header ? ctx.header.cols.find((c) => c.role === "ref") : null;
+  const tipoCol = ctx.header ? ctx.header.cols.find((c) => c.role === "tipo") : null;
+  const split = ctx.explode || explodeItem;
+  const rows = [];
+  let omitted = 0;
+  let pending = null;
+
+  for (const line of lines) {
+    const tokens = mergeDateSpill(line.items.flatMap(split).sort((a, b) => a.x - b.x));
+    const flat = tokens.map((t) => t.s).join(" ").trim();
+    if (!flat) { pending = null; continue; }
+    if (SUMMARY_LINE.test(flat)) { omitted++; pending = null; continue; }
+
+    const dateTok = tokens.find((t) => !isMoney(t.s) && dateIn(t.s, ctx.year));
+
+    if (!dateTok) {
+      const money = tokens.filter((t) => isMoney(t.s)).map((t) => ({ ...t, right: t.x + t.w, v: toMoney(t.s) }));
+      // El importe cayó en el renglón siguiente al de la fecha: se adjunta.
+      if (pending && !pending.hasMoney && money.length) {
+        addAmounts(pending, money, numeric, ctx.invert);
+        continue;
+      }
+      // Renglón de continuación de la descripción (sin fecha ni importe):
+      // se pega al movimiento anterior para no perder el detalle.
+      const textOnly = tokens.filter((t) => !isMoney(t.s)).map((t) => t.s).join(" ").trim();
+      if (SUMMARY_LINE.test(textOnly) || NOISE_LINE.test(textOnly)) { omitted++; pending = null; continue; }
+      // Es continuación si no trae fecha ni importe: se pega al movimiento
+      // anterior. Si el renglón es solo un dato sensible, se descarta pero se
+      // conserva el movimiento para las siguientes continuaciones.
+      if (pending && !money.length && textOnly && textOnly.length <= 90) {
+        const appendText = sanitize(textOnly);
+        if (appendText && appendText !== "[omitido]") {
+          pending.desc = sanitize(pending.desc ? `${pending.desc} ${appendText}` : appendText);
+        }
+        continue;
+      }
+      if (flat) omitted++;
+      pending = null;
+      continue;
+    }
+
+    const row = {
+      fecha: dateIn(dateTok.s, ctx.year), desc: "", cargo: 0, abono: 0, poliza: "",
+      saldo: null, ambiguous: false, bySaldo: false, hasMoney: false,
+    };
+    // Bancos con dos columnas de fecha (operación y liquidación): la gemela se
+    // descarta junto con la primera, no debe ensuciar la descripción.
+    const twinDates = tokens.filter((t) =>
+      t !== dateTok && !isMoney(t.s) && dateIn(t.s, ctx.year) && Math.abs(t.x - dateTok.x) <= 45);
+    const texts = [], money = [];
+    for (const t of tokens) {
+      if (t === dateTok || twinDates.indexOf(t) >= 0) continue;
+      if (isMoney(t.s)) money.push({ ...t, right: t.x + t.w, v: toMoney(t.s) });
+      else if (isFlagToken(t, tipoCol)) money.push({ ...t, right: t.x + t.w, v: null, flag: t.s.toUpperCase() });
+      else texts.push(t);
+    }
+
+    // N° de póliza: el valor que cae en la columna de referencia del banco.
+    // Nunca se toma una cuenta, CLABE, RFC o correo.
+    let refTok = null;
+    if (refCol) {
+      let best = null, bestD = Infinity;
+      for (const t of texts) {
+        const d = Math.abs(t.x - refCol.x);
+        if (d < bestD && d <= 45) { bestD = d; best = t; }
+      }
+      if (best && isPolizaLike(best.s)) {
+        refTok = best;
+        row.poliza = best.s.trim();
+      }
+    }
+    row.desc = sanitize(texts.filter((t) => t !== refTok).map((t) => t.s).join(" "));
+    addAmounts(row, money, numeric, ctx.invert);
+
+    if (!row.cargo && !row.abono) { omitted++; pending = null; continue; }
+    rows.push(row);
+    pending = row;
+  }
+
+  const bySaldo = refineWithSaldo(rows);
+  return {
+    rows,
+    omitted,
+    ambiguous: rows.filter((r) => r.ambiguous).length,
+    bySaldo,
+  };
+}
+
+
+/* ============================================================
+   LECTOR DE PDF (a partir de una librería pdf.js ya cargada)
+   ============================================================ */
+
+async function readPdfPages(lib, file) {
+  const data = new Uint8Array(await file.arrayBuffer());
+  const doc = await lib.getDocument({ data }).promise;
+  const pages = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p);
+    const content = await page.getTextContent();
+    pages.push(content.items.filter((it) => it.str && it.str.trim()).map((it) => ({
+      str: it.str, width: it.width, height: it.height, transform: it.transform,
+    })));
+  }
+  return pages;
+}
+
+/* Encadena todo el análisis de un PDF: páginas -> renglones -> columnas -> movimientos. */
+function analyzePdfItems(pages, opts) {
+  const o = opts || {};
+  const lines = pages.flatMap((items) => groupIntoLines(normalizeItems(items)));
+  const header = findHeaderCols(lines);
+  const cols = buildColumns(lines, header, explodeItem);
+  const res = extractRowsFromLines(lines, {
+    header, cols, invert: !!o.invert, year: o.year || new Date().getFullYear(), explode: explodeItem,
+  });
+  return {
+    lines, header, cols,
+    rows: res.rows, omitted: res.omitted, ambiguous: res.ambiguous, bySaldo: res.bySaldo,
+  };
+}
+
+/* ============================================================
+   CONCILIACIÓN BANCARIA
+   Compara dos listas de movimientos (banco contra libros) por
+   importe absoluto y cercanía de fecha. Todo determinista.
+   ============================================================ */
+
+const DAY_MS = 86400000;
+
+function dayDiff(a, b) {
+  if (!a || !b) return null;
+  const da = Date.parse(`${a}T12:00:00Z`);
+  const db = Date.parse(`${b}T12:00:00Z`);
+  if (!Number.isFinite(da) || !Number.isFinite(db)) return null;
+  return Math.round((da - db) / DAY_MS);
+}
+
+function movementOf(row, source) {
+  const cargo = Number(row && row.cargo) || 0;
+  const abono = Number(row && row.abono) || 0;
+  const monto = abono - cargo;                 // + abono (entrada), - cargo (salida)
+  return {
+    source: source || "",
+    fecha: (row && row.fecha) || null,
+    desc: (row && row.desc) || "",
+    cargo, abono, monto,
+    abs: Math.abs(monto),
+    poliza: (row && row.poliza) || "",
+  };
+}
+
+function buildPair(b, bd, dateTol) {
+  const dd = b && bd ? dayDiff(b.fecha, bd.fecha) : null;
+  let estado = "conciliado";
+  if (!b) estado = "solo-libros";
+  else if (!bd) estado = "solo-banco";
+  else if (dd == null || Math.abs(dd) > dateTol) estado = "posible";
+  return {
+    estado,
+    fechaBanco: b ? b.fecha : null,
+    descBanco: b ? b.desc : "",
+    cargoBanco: b ? b.cargo : 0,
+    abonoBanco: b ? b.abono : 0,
+    montoBanco: b ? b.monto : 0,
+    fechaLibros: bd ? bd.fecha : null,
+    descLibros: bd ? bd.desc : "",
+    cargoLibros: bd ? bd.cargo : 0,
+    abonoLibros: bd ? bd.abono : 0,
+    montoLibros: bd ? bd.monto : 0,
+    dias: dd,
+    difImporte: b && bd ? Math.round((b.abs - bd.abs) * 100) / 100 : 0,
+    signoEspejo: !!(b && bd && b.monto !== 0 && bd.monto !== 0 && Math.sign(b.monto) !== Math.sign(bd.monto)),
+    poliza: (bd && bd.poliza) || (b && b.poliza) || "",
+  };
+}
+
+/**
+ * Concilia banco contra libros.
+ * opts: { dateTolerance = 3, amountTolerance = 0.01, looseWindow = 45 }
+ * Pasadas: (1) fecha dentro de la tolerancia, (2) fecha lejana (partida en
+ * tránsito, hasta looseWindow días), (3) alguna fecha faltante -> solo importe.
+ * Lo que sobra queda como "solo-banco" o "solo-libros".
+ */
+function reconcile(bankRows, bookRows, opts) {
+  const o = opts || {};
+  const dateTol = o.dateTolerance == null ? 3 : o.dateTolerance;
+  const amtTol = o.amountTolerance == null ? 0.01 : o.amountTolerance;
+  const looseWindow = o.looseWindow == null ? 45 : o.looseWindow;
+  // En libros el movimiento esta "espejeado": un deposito es CARGO a la cuenta
+  // de bancos y un retiro es ABONO. Por eso, para comparar totales, el neto de
+  // libros se invierte. Con "mismo" se compara tal cual viene.
+  const signoL = o.signoLibros === "mismo" ? 1 : -1;
+
+  const bank = (bankRows || []).map((r) => movementOf(r, "banco"));
+  const books = (bookRows || []).map((r) => movementOf(r, "libros"));
+  const usedBank = new Array(bank.length).fill(false);
+  const usedBook = new Array(books.length).fill(false);
+
+  const index = new Map();
+  books.forEach((b, i) => {
+    if (!b.abs) return;
+    const k = Math.round(b.abs * 100);
+    const list = index.get(k);
+    if (list) list.push(i); else index.set(k, [i]);
+  });
+  const tolc = Math.max(0, Math.round(amtTol * 100));
+  const candidatesFor = (target) => {
+    if (!target) return [];
+    const k0 = Math.round(target * 100);
+    let out = [];
+    for (let k = k0 - tolc; k <= k0 + tolc; k++) {
+      const list = index.get(k);
+      if (list) out = out.concat(list);
+    }
+    return out;
+  };
+
+  const pairs = [];
+  const runPass = (maxDays, mode) => {
+    for (let i = 0; i < bank.length; i++) {
+      if (usedBank[i]) continue;
+      const b = bank[i];
+      if (!b.abs) continue;
+      let best = -1, bestCost = Infinity;
+      for (const j of candidatesFor(b.abs)) {
+        if (usedBook[j]) continue;
+        const bd = books[j];
+        const dd = dayDiff(b.fecha, bd.fecha);
+        if (mode === "nodate") { if (dd != null) continue; }
+        else if (dd == null || Math.abs(dd) > maxDays) continue;
+        const cost = (dd == null ? 999 : Math.abs(dd)) * 1000 + Math.abs(b.abs - bd.abs) * 100;
+        if (cost < bestCost) { bestCost = cost; best = j; }
+      }
+      if (best < 0) continue;
+      usedBank[i] = true;
+      usedBook[best] = true;
+      pairs.push(buildPair(b, books[best], dateTol));
+    }
+  };
+
+  runPass(dateTol, "strict");
+  runPass(looseWindow, "loose");
+  runPass(null, "nodate");
+
+  for (let i = 0; i < bank.length; i++) if (!usedBank[i]) pairs.push(buildPair(bank[i], null, dateTol));
+  for (let j = 0; j < books.length; j++) if (!usedBook[j]) pairs.push(buildPair(null, books[j], dateTol));
+
+  pairs.sort((a, b) => String(a.fechaBanco || a.fechaLibros || "").localeCompare(String(b.fechaBanco || b.fechaLibros || "")));
+
+  const sum = (list, key) => list.reduce((a, x) => a + (Number(x[key]) || 0), 0);
+  const pick = (e) => pairs.filter((p) => p.estado === e);
+  const conciliados = pick("conciliado");
+  const posibles = pick("posible");
+  const onlyBank = pick("solo-banco");
+  const onlyBooks = pick("solo-libros");
+
+  const round2 = (n) => Math.round(n * 100) / 100;
+  const netoBanco = round2(sum(bank, "monto"));
+  const netoLibros = round2(signoL * sum(books, "monto"));
+  const sinBanco = round2(sum(onlyBank, "montoBanco"));
+  const sinLibros = round2(signoL * sum(onlyBooks, "montoLibros"));
+  const diferencia = round2(netoBanco - netoLibros);
+  const explicada = round2(sinBanco - sinLibros);
+
+  return {
+    pairs,
+    summary: {
+      bancoN: bank.length, librosN: books.length,
+      bancoCargos: round2(sum(bank, "cargo")), bancoAbonos: round2(sum(bank, "abono")), bancoNeto: netoBanco,
+      librosCargos: round2(sum(books, "cargo")), librosAbonos: round2(sum(books, "abono")),
+      librosNeto: netoLibros, signoLibros: signoL === -1 ? "espejo" : "mismo",
+      conciliados: conciliados.length,
+      posibles: posibles.length,
+      soloBanco: onlyBank.length,
+      soloLibros: onlyBooks.length,
+      soloBancoMonto: sinBanco,
+      soloLibrosMonto: sinLibros,
+      diferencia, explicada,
+      cuadra: Math.abs(diferencia - explicada) < 0.01,
+      espejo: pairs.filter((p) => p.signoEspejo).length,
+      mismoSentido: conciliados.filter((p) => !p.signoEspejo).length,
+      sinFecha: pairs.filter((p) => (p.estado === "conciliado" || p.estado === "solo-banco") && !p.fechaBanco).length +
+                pairs.filter((p) => p.estado === "solo-libros" && !p.fechaLibros).length,
+    },
+  };
+}
+/* ==== MOTOR:FIN ==== */
+
+const PDFJS_VER = "4.10.38";
+const MXN = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+let pdfjs = null;
+
+async function loadPdfJs() {
+  if (pdfjs) return pdfjs;
+  try {
+    const mod = await import(`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VER}/build/pdf.min.mjs`);
+    mod.GlobalWorkerOptions.workerSrc =
+      `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VER}/build/pdf.worker.min.mjs`;
+    pdfjs = mod;
+    return mod;
+  } catch (e) {
+    throw new Error("No se pudo cargar el lector de PDF (se necesita internet). Si sigue igual, exporta el estado de cuenta como Excel o CSV desde tu banca en linea.");
+  }
+}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ------------------------------- estado ------------------------------- */
+
+const MAP_LABELS = [
+  ["fecha", "Fecha"], ["desc", "Descripción"], ["cargo", "Cargo"],
+  ["abono", "Abono"], ["poliza", "N° póliza"], ["monto", "Importe único"], ["tipo", "Tipo (C/A)"],
+];
+
+function newSide(key, title) {
+  return { key, title, rows: [], mode: null, headerRow: null, body: [], map: null,
+           lines: [], header: null, cols: [], wb: null, sheet: null, diag: [], fileName: "" };
+}
+const sides = { banco: newSide("banco", "Banco"), libros: newSide("libros", "Libros") };
+let result = null;
+let onlyDiff = false;
+
+function setStatus(side, msg, type) {
+  const el = $("status" + side.key[0].toUpperCase() + side.key.slice(1));
+  el.textContent = msg || "";
+  el.className = "status" + (type ? " " + type : "");
+}
+
+/* --------------------------- lectura de archivos --------------------------- */
+
+function matrixFromWorkbook(wb, sheetName) {
+  const name = sheetName || wb.SheetNames[0];
+  if (!name) return [];
+  return XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: "", blankrows: false });
+}
+
+function matrixDiag(matrix) {
+  return matrix.slice(0, 40).map((r) =>
+    (r || []).map((c) => String(c instanceof Date ? parseDate(c) ?? "" : c ?? "").trim()).filter(Boolean).join(" | "));
+}
+
+async function loadInto(side, file) {
+  side.fileName = file.name;
+  setStatus(side, `Leyendo ${file.name}…`);
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  try {
+    if (ext === "pdf") {
+      const pages = await readPdfPages(await loadPdfJs(), file);
+      if (!pages.some((p) => p.length)) {
+        resetSide(side);
+        setStatus(side, "Este PDF no tiene texto (parece un escaneo). Exporta Excel/CSV desde el sistema.", "err");
+        renderSide(side);
+        return;
+      }
+      const lines = pages.flatMap((items) => groupIntoLines(normalizeItems(items)));
+      const header = findHeaderCols(lines);
+      const cols = buildColumns(lines, header, explodeItem);
+      const res = extractRowsFromLines(lines, { header, cols, invert: false, year: new Date().getFullYear(), explode: explodeItem });
+      side.mode = "pdf";
+      side.lines = lines;
+      side.header = header;
+      side.cols = cols;
+      side.rows = res.rows;
+      side.omitted = res.omitted;
+      side.diag = lines.map(lineTextOf).slice(0, 40);
+      side.headerRow = null;
+      side.map = null;
+      side.wb = null;
+    } else if (ext === "csv" || ext === "txt") {
+      side.wb = XLSX.read(await file.text(), { type: "string", cellDates: true });
+      side.sheet = side.wb.SheetNames[0];
+      applyMatrix(side, matrixFromWorkbook(side.wb, side.sheet));
+    } else if (ext === "xlsx" || ext === "xls") {
+      side.wb = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+      side.sheet = side.wb.SheetNames[0];
+      applyMatrix(side, matrixFromWorkbook(side.wb, side.sheet));
+    } else {
+      throw new Error("formato");
+    }
+    renderSide(side);
+    setStatus(side, `${side.rows.length} movimientos leídos de ${file.name}`, "ok");
+  } catch (err) {
+    setStatus(side, "No se pudo leer el archivo. Prueba exportarlo como Excel o CSV.", "err");
+  }
+}
+
+function applyMatrix(side, matrix) {
+  if (!matrix.length) throw new Error("vacío");
+  const found = findHeaderRow(matrix);
+  if (found) {
+    side.mode = "table";
+    side.headerRow = matrix[found.idx];
+    side.body = matrix.slice(found.idx + 1);
+    side.map = found.map;
+    side.lines = [];
+    side.header = null;
+    side.cols = [];
+    side.diag = matrixDiag(matrix);
+    side.rows = buildFromTable(side.headerRow, side.body, side.map, new Date().getFullYear()).rows;
+  } else {
+    // Sin encabezado: se trata como texto y se usa el mismo motor del PDF.
+    const lines = matrix.filter(Array.isArray).map((r) => ({
+      mean: 0,
+      items: r.map((c, i) => ({
+        x: i * 40, y: 0, w: 40, h: 8,
+        s: String(c instanceof Date ? parseDate(c) ?? "" : c ?? "").trim(),
+      })).filter((it) => it.s),
+    })).filter((l) => l.items.length);
+    const res = extractRowsFromLines(lines, { header: null, cols: buildColumns(lines, null, explodeItem), invert: false, year: new Date().getFullYear(), explode: explodeItem });
+    side.mode = "pdf";
+    side.lines = lines;
+    side.header = null;
+    side.cols = [];
+    side.rows = res.rows;
+    side.omitted = res.omitted;
+    side.diag = matrixDiag(matrix);
+  }
+}
+
+function resetSide(side) {
+  side.rows = [];
+  side.mode = null;
+  side.headerRow = null;
+  side.body = [];
+  side.map = null;
+  side.lines = [];
+  side.header = null;
+  side.cols = [];
+  side.wb = null;
+  side.diag = [];
+}
+
+/* -------------------------- interfaz por lado -------------------------- */
+
+function renderSide(side) {
+  const host = $("extra" + side.key[0].toUpperCase() + side.key.slice(1));
+  const drop = $("drop" + side.key[0].toUpperCase() + side.key.slice(1));
+  drop.classList.toggle("loaded", side.rows.length > 0);
+  if (!side.rows.length && !side.headerRow) { host.innerHTML = ""; return; }
+
+  let html = "";
+
+  if (side.map) {
+    html += `<details open><summary>Ajustes de lectura (${side.rows.length} movimientos)</summary>
+      <p class="sub" style="font-size:0.75rem;margin:0.4rem 0 0">Detectamos estas columnas. Si alguna quedó mal, cámbiala.</p>
+      <div class="mapGrid">` +
+      MAP_LABELS.map(([key, label]) => {
+        const opts = [`<option value="-1">&mdash; no usar &mdash;</option>`]
+          .concat(side.headerRow.map((h, i) =>
+            `<option value="${i}" ${side.map[key] === i ? "selected" : ""}>${esc(h) || `Columna ${i + 1}`}</option>`)).join("");
+        return `<div class="fld"><label>${label}</label><select data-side="${side.key}" data-role="${key}">${opts}</select></div>`;
+      }).join("") + `</div>`;
+
+    if (side.wb && side.wb.SheetNames.length > 1) {
+      html += `<div class="fld" style="margin-top:0.6rem"><label>Hoja del archivo</label>
+        <select data-side="${side.key}" data-role="__sheet">` +
+        side.wb.SheetNames.map((n) => `<option ${n === side.sheet ? "selected" : ""}>${esc(n)}</option>`).join("") +
+        `</select></div>`;
+    }
+    html += `</details>`;
+  }
+
+  const colTxt = (side.cols || []).map((c) => `${c.role}@${Math.round(c.right)}`).join(" · ");
+  html += `<details><summary>Ver cómo se leyó el archivo</summary>
+    <div class="meta">${side.mode === "pdf" ? "PDF" : "Excel/CSV"} ·
+      encabezado: <b>${esc(side.header ? side.header.text : (side.headerRow ? side.headerRow.filter(Boolean).join(" | ") : "no detectado"))}</b>
+      ${colTxt ? `<br />columnas de importe: <b>${esc(colTxt)}</b>` : ""}
+      ${side.omitted ? `<br />renglones ignorados: <b>${side.omitted}</b>` : ""}</div>
+    <pre>${esc((side.diag || []).map((l, i) => `${String(i + 1).padStart(3, " ")}│ ${l}`).join("\n"))}</pre>
+  </details>`;
+  host.innerHTML = html;
+
+  host.querySelectorAll("select").forEach((sel) => {
+    sel.addEventListener("change", () => {
+      if (sel.dataset.role === "__sheet") {
+        side.sheet = sel.value;
+        applyMatrix(side, matrixFromWorkbook(side.wb, side.sheet));
+      } else {
+        side.map[sel.dataset.role] = Number(sel.value);
+        side.rows = buildFromTable(side.headerRow, side.body, side.map, new Date().getFullYear()).rows;
+      }
+      renderSide(side);
+      setStatus(side, `${side.rows.length} movimientos leídos de ${side.fileName}`, "ok");
+    });
+  });
+}
+
+/* ------------------------------ conciliación ------------------------------ */
+
+function run() {
+  if (!sides.banco.rows.length || !sides.libros.rows.length) {
+    setStatus(sides.banco.rows.length ? sides.libros : sides.banco, "Falta cargar este archivo.", "err");
+    return;
+  }
+  result = reconcile(sides.banco.rows, sides.libros.rows, {
+    dateTolerance: Number($("dateTol").value),
+    amountTolerance: Number($("amtTol").value),
+    signoLibros: $("signoLibros").value,
+  });
+  renderResult();
+}
+
+const ESTADOS = {
+  "conciliado": "Conciliado",
+  "posible": "Fecha lejana",
+  "solo-banco": "Solo banco",
+  "solo-libros": "Solo libros",
+};
+
+function renderResult() {
+  const panel = $("resultPanel");
+  if (!result) { panel.hidden = true; return; }
+  panel.hidden = false;
+  const s = result.summary;
+
+  $("tiles").innerHTML = [
+    [`Conciliados`, s.conciliados, "good"],
+    [`Fecha lejana`, s.posibles, "warn"],
+    [`Solo banco`, s.soloBanco, "bad"],
+    [`Solo libros`, s.soloLibros, "bad"],
+    [`Diferencia banco − libros`, MXN.format(s.diferencia), s.cuadra ? "good" : "bad"],
+    [`Explicada por lo no conciliado`, MXN.format(Math.abs(s.explicada)), s.cuadra ? "good" : "bad"],
+  ].map(([k, v, cls]) => `<div class="tile ${cls}">${k}<b>${typeof v === "number" ? v : v}</b></div>`).join("");
+
+  const rows = onlyDiff ? result.pairs.filter((p) => p.estado !== "conciliado") : result.pairs;
+  const wrap = $("tableWrap");
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty">${onlyDiff && result.pairs.length
+      ? "No hay diferencias: todo quedó conciliado."
+      : "Presiona <strong>Conciliar</strong> para cruzar los movimientos."}</div>`;
+  } else {
+    wrap.innerHTML = `<table>
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th class="grp" colspan="4">Banco</th>
+          <th class="grp" colspan="4">Libros</th>
+          <th>Días</th><th>N&deg; póliza</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th>Fecha</th><th>Concepto</th><th style="text-align:right">Cargo</th><th style="text-align:right">Abono</th>
+          <th>Fecha</th><th>Concepto</th><th style="text-align:right">Cargo</th><th style="text-align:right">Abono</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody>` + rows.slice(0, 4000).map((p) => `
+        <tr class="est-${p.estado}">
+          <td><span class="tag">${ESTADOS[p.estado] || p.estado}</span></td>
+          <td>${esc(p.fechaBanco || "")}</td>
+          <td class="desc">${esc(p.descBanco || "")}</td>
+          <td class="num">${p.cargoBanco ? esc(MXN.format(p.cargoBanco)) : ""}</td>
+          <td class="num">${p.abonoBanco ? esc(MXN.format(p.abonoBanco)) : ""}</td>
+          <td>${esc(p.fechaLibros || "")}</td>
+          <td class="desc">${esc(p.descLibros || "")}</td>
+          <td class="num">${p.cargoLibros ? esc(MXN.format(p.cargoLibros)) : ""}</td>
+          <td class="num">${p.abonoLibros ? esc(MXN.format(p.abonoLibros)) : ""}</td>
+          <td class="num">${p.dias == null ? "" : p.dias}</td>
+          <td>${esc(p.poliza || "")}</td>
+        </tr>`).join("") + `</tbody></table>`;
+  }
+  if (rows.length > 4000) setStatus(sides.banco, `Mostrando 4,000 de ${rows.length} renglones. La descarga incluye todos.`);
+
+  const warns = [];
+  if (s.cuadra) warns.push("La diferencia entre banco y libros queda explicada por los renglones no conciliados: la conciliación cierra.");
+  else warns.push(`La diferencia entre banco y libros (${MXN.format(s.diferencia)}) NO queda explicada por lo no conciliado (${MXN.format(Math.abs(s.explicada))}). Revisa las tolerancias o busca partidas faltantes.`);
+  if (s.posibles) warns.push(`${s.posibles} movimiento(s) se cruzaron con una fecha lejana (más de la tolerancia, hasta 45 días): probablemente sean partidas en tránsito; el renglón muestra los días de diferencia.`);
+  if (s.mismoSentido) warns.push(`${s.mismoSentido} movimiento(s) conciliado(s) tienen el MISMO sentido en banco y libros. Si tu auxiliar espejea la cuenta de bancos (lo normal), revisa esos renglones o cambia "Signo en libros".`);
+  if (s.espejo) warns.push(`${s.espejo} pares van en sentido espejo, que es lo normal cuando los libros se llevan desde la cuenta de bancos.`);
+  if (s.sinFecha) warns.push(`${s.sinFecha} movimiento(s) sin fecha legible: se cruzaron solo por importe.`);
+  const wEl = $("warns");
+  wEl.hidden = false;
+  wEl.innerHTML = "Revisa esto:<ul>" + warns.map((w) => `<li>${w}</li>`).join("") + "</ul>";
+}
+
+/* --------------------------------- salida --------------------------------- */
+
+const OUT_COLS = ["estado", "fecha_banco", "concepto_banco", "cargo_banco", "abono_banco",
+                  "fecha_libros", "concepto_libros", "cargo_libros", "abono_libros", "dias_diferencia", "numero_poliza"];
+
+function outAoA() {
+  const rows = (result ? result.pairs : []).map((p) => [
+    ESTADOS[p.estado] || p.estado, p.fechaBanco || "", p.descBanco || "",
+    p.cargoBanco || "", p.abonoBanco || "", p.fechaLibros || "", p.descLibros || "",
+    p.cargoLibros || "", p.abonoLibros || "", p.dias == null ? "" : p.dias, p.poliza || "",
+  ]);
+  return [OUT_COLS].concat(rows);
+}
+
+function summaryAoA() {
+  const s = result ? result.summary : {};
+  return [
+    ["Concepto", "Importe / cantidad"],
+    ["Movimientos en banco", s.bancoN], ["Cargos banco", s.bancoCargos], ["Abonos banco", s.bancoAbonos], ["Neto banco", s.bancoNeto],
+    ["Movimientos en libros", s.librosN], ["Cargos libros", s.librosCargos], ["Abonos libros", s.librosAbonos], ["Neto libros (comparable)", s.librosNeto],
+    ["Signo aplicado a libros", s.signoLibros === "espejo" ? "Espejo" : "Mismo sentido"],
+    ["Conciliados", s.conciliados], ["Con fecha lejana", s.posibles], ["Solo banco", s.soloBanco], ["Solo libros", s.soloLibros],
+    ["Importe solo banco", s.soloBancoMonto], ["Importe solo libros (comparable)", s.soloLibrosMonto],
+    ["Diferencia banco - libros", s.diferencia], ["Explicada por lo no conciliado", s.explicada],
+    ["Cuadra", s.cuadra ? "Sí" : "No"],
+    ["Tolerancia de fecha (días)", Number($("dateTol").value)],
+    ["Tolerancia de importe", Number($("amtTol").value)],
+  ];
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+$("dlCsv").addEventListener("click", () => {
+  if (!result) return;
+  const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = outAoA().map((r) => r.map(q).join(",")).join("\r\n");
+  download(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }), "conciliacion-bancaria.csv");
+});
+
+$("dlXlsx").addEventListener("click", () => {
+  if (!result) return;
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(outAoA());
+  ws["!cols"] = [{ wch: 14 }, { wch: 12 }, { wch: 40 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 40 }, { wch: 14 }, { wch: 14 }, { wch: 8 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, ws, "Conciliacion");
+  const ws2 = XLSX.utils.aoa_to_sheet(summaryAoA());
+  ws2["!cols"] = [{ wch: 34 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
+  XLSX.writeFile(wb, "conciliacion-bancaria.xlsx");
+});
+
+/* --------------------------------- eventos --------------------------------- */
+
+[["banco", "dropBanco", "fileBanco"], ["libros", "dropLibros", "fileLibros"]].forEach(([key, dropId, inputId]) => {
+  const drop = $(dropId), input = $(inputId);
+  drop.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    if (input.files && input.files[0]) void loadInto(sides[key], input.files[0]);
+    input.value = "";
+  });
+  ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) void loadInto(sides[key], f);
+  });
+});
+
+$("runBtn").addEventListener("click", run);
+$("onlyDiff").addEventListener("change", (e) => { onlyDiff = e.target.checked; renderResult(); });
+
+window.__fiscalOk = true;
+</script>
+</body>
+</html>
