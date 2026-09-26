@@ -86,6 +86,90 @@
   tr.est-solo-banco td:first-child { border-left: 3px solid #c9614f; background: #1e1412; }
   tr.est-solo-libros td:first-child { border-left: 3px solid #5b8fd0; background: #121a24; }
   .tag { font-size: 0.7rem; padding: 0.12rem 0.45rem; border-radius: 999px; border: 1px solid #3a4658; color: #cbd5e1; }
+  /* --- Diferencias detectadas: lo primero que hay que ver --- */
+  .difbox { border: 1px solid #6b3030; background: #1b1210; border-radius: 12px; padding: 0.9rem 1.05rem; margin-bottom: 0.95rem; }
+  .difbox.ok { border-color: #3f6b4a; background: #101a14; }
+  .difbox h3 { margin: 0 0 0.4rem; font-size: 0.95rem; color: #f1f5f9; display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+  .difbox .conteo { font-size: 0.72rem; border: 1px solid #6b3030; color: #f0b8a8; border-radius: 999px; padding: 0.12rem 0.5rem; font-weight: 400; }
+  .difbox.ok .conteo { border-color: #3f6b4a; color: #a8d8b6; }
+  .difbox .difnota { font-size: 0.78rem; color: #cbd5e1; line-height: 1.55; margin: 0 0 0.75rem; }
+  .difbox .difnota b { color: #f1f5f9; }
+  .difbox .difnota .falta { color: #f0b8a8; font-weight: 600; }
+  /* Veredicto: el estado de la conciliación, orientado a lo que hay que hacer */
+  .veredicto { display: flex; align-items: center; gap: 0.7rem; border-radius: 10px; padding: 0.7rem 0.85rem; margin-bottom: 0.8rem; border: 1px solid #6b3030; background: #241413; }
+  .veredicto.ok { border-color: #3f6b4a; background: #12211a; }
+  .veredicto.duda { border-color: #8a6a2f; background: #221b10; }
+  .veredicto .icono { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 700; border: 2px solid #c9614f; color: #f0b8a8; }
+  .veredicto.ok .icono { border-color: #4f9b78; color: #a8d8b6; }
+  .veredicto.duda .icono { border-color: #d4af37; color: #f0d48a; }
+  .veredicto .vt { font-size: 0.93rem; font-weight: 600; color: #f1f5f9; }
+  .veredicto .vs { font-size: 0.78rem; color: #cbd5e1; line-height: 1.5; margin-top: 0.15rem; }
+  .veredicto .vs b { color: #f1f5f9; }
+
+  /* Tarjetas por póliza: cada una responde «¿qué póliza?» y «¿qué hago?» */
+  .polcat { margin-bottom: 0.9rem; }
+  .polcat .pcat { margin: 0 0 0.5rem; font-size: 0.95rem; color: #f1f5f9; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .polcat .conteo { font-size: 0.71rem; font-weight: 400; border: 1px solid #3a4658; color: #94a3b8; border-radius: 999px; padding: 0.1rem 0.5rem; }
+  .polgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.6rem; }
+  .polcard { border: 1px solid #6b3030; border-left: 4px solid #c9614f; border-radius: 9px; background: #1b1210; padding: 0.6rem 0.75rem; }
+  .polcard.libros { border-color: #34527a; border-left-color: #5b8fd0; background: #111a26; }
+  .polcard.revisar { border-color: #6b5a20; border-left-color: #d4af37; background: #1d1810; }
+  .polnum { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 1.15rem; font-weight: 700; color: #f1f5f9; letter-spacing: 0.01em; word-break: break-all; }
+  .polcard.libros .polnum { color: #cfe1f5; }
+  .polacc { font-size: 0.73rem; margin-top: 0.2rem; color: #f0b8a8; font-weight: 600; }
+  .polcard.libros .polacc { color: #a8c6ea; }
+  .polcard.revisar .polacc { color: #f0d48a; }
+  .polmov { font-size: 0.75rem; color: #cbd5e1; margin-top: 0.45rem; border-top: 1px solid #22303f; padding-top: 0.42rem; line-height: 1.45; }
+  .polmov .f { color: #94a3b8; }
+  .polmov .imp { font-variant-numeric: tabular-nums; color: #f1f5f9; font-weight: 600; display: block; margin-top: 0.1rem; }
+  .polmov .irlink { margin-top: 0.32rem; }
+  details.difmas { border-top: 1px solid #2c3746; margin-top: 0.8rem; padding-top: 0.6rem; }
+  details.difmas > summary { font-size: 0.76rem; color: #94a3b8; cursor: pointer; list-style: none; }
+  details.difmas > summary::-webkit-details-marker { display: none; }
+  details.difmas > summary::before { content: "\25B8  "; color: #d4af37; }
+  details.difmas[open] > summary::before { content: "\25BE  "; }
+  details.difmas > summary:hover { color: #f1f5f9; }
+  details.difmas .cuerpo { margin-top: 0.7rem; }
+
+  /* Puente de conciliación: de los libros al banco, dibujado a escala */
+  .puente { border: 1px solid #2c3746; border-radius: 10px; padding: 0.7rem 0.85rem; background: #101a26; margin-bottom: 0.85rem; }
+  .puente .ptit { font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.55rem; }
+  .puente .pr { display: grid; grid-template-columns: minmax(140px, 1.5fr) minmax(60px, 2.4fr) auto; gap: 0.55rem; align-items: center; padding: 0.2rem 0; }
+  .puente .pr .et { font-size: 0.75rem; color: #94a3b8; line-height: 1.35; }
+  .puente .pr .br { height: 15px; background: #182433; border-radius: 4px; overflow: hidden; }
+  .puente .pr .br i { display: block; height: 100%; border-radius: 4px; }
+  .puente .pr .im { font-size: 0.79rem; font-variant-numeric: tabular-nums; text-align: right; min-width: 6.4rem; color: #f1f5f9; }
+  .puente .pr.lib i { background: #5b8fd0; }
+  .puente .pr.menos i { background: #c99a3e; }
+  .puente .pr.mas i { background: #4f9b78; }
+  .puente .pr.ubica i { background: #c9614f; }
+  .puente .pr.banco i { background: #cbd5e1; }
+  .puente .pr.total .et, .puente .pr.total .im { color: #f1f5f9; font-weight: 600; }
+  .puente .pr.total { border-top: 1px solid #2c3746; margin-top: 0.2rem; padding-top: 0.4rem; }
+  .puente .pnota { font-size: 0.71rem; color: #7c8899; margin-top: 0.5rem; }
+
+  /* Barrita de peso dentro de la columna de importe */
+  .peso { display: block; height: 3px; background: #22303f; border-radius: 2px; margin-top: 4px; }
+  .peso > span { display: block; height: 100%; border-radius: 2px; background: #c9614f; }
+  tr.lado-libros .peso > span { background: #5b8fd0; }
+  tr.lado-revisar .peso > span { background: #d4af37; }
+
+  table.dif { font-size: 0.76rem; }
+  table.dif th { text-align: left; font-weight: 600; color: #94a3b8; border-bottom: 1px solid #2c3746; padding: 0.35rem 0.5rem; white-space: nowrap; }
+  table.dif td { padding: 0.38rem 0.5rem; border-bottom: 1px solid #1e2836; vertical-align: top; }
+  table.dif td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.dif td.accion { color: #94a3b8; line-height: 1.4; max-width: 34ch; white-space: normal; }
+  .diftabla { overflow-x: auto; }
+  table.dif td.pol { font-variant-numeric: tabular-nums; color: #cbd5e1; }
+  table.dif tr.lado-banco td:first-child { border-left: 3px solid #c9614f; }
+  table.dif tr.lado-libros td:first-child { border-left: 3px solid #5b8fd0; }
+  .irlink { background: none; border: 1px solid #3a4658; color: #cbd5e1; font-size: 0.71rem; border-radius: 6px; padding: 0.16rem 0.5rem; cursor: pointer; white-space: nowrap; }
+  .irlink:hover { border-color: #d4af37; color: #f5e7b8; }
+  tr.foco td { background: #2a2410 !important; box-shadow: inset 0 0 0 2px #d4af37; }
+  .difbox .mas { font-size: 0.74rem; color: #94a3b8; margin: 0.5rem 0 0; }
+  .difbox .massub { font-size: 0.79rem; color: #f0d48a; margin: 0.95rem 0 0.45rem; }
+  table.dif tr.lado-revisar td:first-child { border-left: 3px solid #d4af37; }
+  .difbox .mas button { margin-left: 0.4rem; }
   .warns { margin-top: 0.9rem; font-size: 0.76rem; color: #f0d48a; background: #241f10; border: 1px solid #6b5a20; border-radius: 10px; padding: 0.7rem 0.95rem; line-height: 1.55; }
   .warns ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
   .empty { padding: 1.3rem; color: #8b95a5; font-size: 0.82rem; text-align: center; line-height: 1.6; }
@@ -182,6 +266,7 @@
   <section id="resultPanel" hidden>
     <h2>Resultado</h2>
     <div class="tiles" id="tiles"></div>
+    <div class="difbox" id="difBox" hidden></div>
     <div class="actions">
       <button class="btn" id="dlXlsx">Descargar Excel</button>
       <button class="btn ghost" id="dlCsv">Descargar CSV</button>
@@ -1293,6 +1378,7 @@ function run() {
     amountTolerance: Number($("amtTol").value),
     signoLibros: $("signoLibros").value,
   });
+  result.pairs.forEach((p, i) => { p._id = "par" + i; });
   renderResult();
 }
 
@@ -1302,6 +1388,278 @@ const ESTADOS = {
   "solo-banco": "Solo banco",
   "solo-libros": "Solo libros",
 };
+
+/* ------------------- Diferencias: en qué póliza y en qué movimiento -------------------
+   Toma los pares del cruce y arma la lista de partidas concretas: qué movimiento falta
+   en cada lado, con su importe, su número de póliza y qué revisar. Se ordena por importe
+   (la causa más probable primero) para no tener que recorrer toda la tabla. */
+function analizarDiferencias() {
+  if (!result) return null;
+  const s = result.summary;
+  const signoL = s.signoLibros === "espejo" ? -1 : 1;
+  const partidas = [];
+  const revisar = [];
+  result.pairs.forEach((p) => {
+    if (p.estado === "solo-banco") {
+      partidas.push({
+        grupo: "banco", lado: "En banco, falta en libros",
+        fecha: p.fechaBanco, desc: p.descBanco, cargo: p.cargoBanco, abono: p.abonoBanco,
+        comparable: p.montoBanco, poliza: "", id: p._id,
+        accion: "El banco lo aplicó y tu auxiliar no lo tiene: regístralo, o aclara con el banco de qué se trata.",
+      });
+    } else if (p.estado === "solo-libros") {
+      partidas.push({
+        grupo: "libros", lado: "En libros, falta en banco",
+        fecha: p.fechaLibros, desc: p.descLibros, cargo: p.cargoLibros, abono: p.abonoLibros,
+        comparable: signoL * p.montoLibros, poliza: p.poliza || "", id: p._id,
+        accion: "Está en tu póliza y el banco no lo trae: puede ser un cheque no cobrado, una transferencia en tránsito o un error de fecha o de importe.",
+      });
+    } else if (p.estado === "posible") {
+      revisar.push({
+        grupo: "revisar", lado: "Cruzado con fecha lejana",
+        fecha: p.fechaBanco || p.fechaLibros, desc: p.descBanco || p.descLibros,
+        cargo: p.cargoBanco || p.cargoLibros, abono: p.abonoBanco || p.abonoLibros,
+        comparable: p.montoBanco, poliza: p.poliza || "", dias: p.dias, id: p._id,
+        accion: "Se cruzó con " + Math.abs(p.dias) + " día(s) de diferencia: si es una partida en tránsito está bien; si no, revisa la fecha.",
+      });
+    }
+  });
+  const porImporte = (a, b) => Math.abs(b.comparable) - Math.abs(a.comparable);
+  partidas.sort(porImporte);
+  revisar.sort(porImporte);
+  const suma = (list) => Math.round(list.reduce((a, x) => a + x.comparable, 0) * 100) / 100;
+  const delBanco = partidas.filter((x) => x.grupo === "banco");
+  const deLibros = partidas.filter((x) => x.grupo === "libros");
+  const polizas = [...new Set(deLibros.map((x) => x.poliza).filter(Boolean))];
+  return {
+    partidas, revisar,
+    bancoN: delBanco.length, bancoTotal: suma(delBanco),
+    librosN: deLibros.length, librosTotal: suma(deLibros),
+    polizas,
+    explicada: Math.round((suma(delBanco) - suma(deLibros)) * 100) / 100,
+  };
+}
+
+function filaDif(x, n, maxAbs) {
+  const imp = x.cargo ? "Cargo " + MXN.format(x.cargo) : (x.abono ? "Abono " + MXN.format(x.abono) : "");
+  const pct = maxAbs > 0 ? Math.max(4, Math.round(Math.abs(x.comparable) / maxAbs * 100)) : 0;
+  return `<tr class="lado-${x.grupo === "libros" ? "libros" : x.grupo === "revisar" ? "revisar" : "banco"}">
+    <td class="num">${n}</td>
+    <td>${esc(x.lado)}</td>
+    <td>${esc(x.fecha || "sin fecha")}</td>
+    <td class="desc">${esc(x.desc || "")}</td>
+    <td class="num">${esc(imp)}<span class="peso"><span style="width:${pct}%"></span></span></td>
+    <td class="pol">${esc(x.poliza || (x.grupo === "banco" ? "no está en libros" : "—"))}</td>
+    <td class="accion">${esc(x.accion)}</td>
+    <td><button class="irlink" data-ir="${esc(x.id)}">Ver renglón</button></td>
+  </tr>`;
+}
+
+/* Redondeo a centavos (round2 vive dentro de reconcile, no se puede usar aquí). */
+const r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
+/* El estado de la conciliación, orientado a lo que hay que hacer: pólizas. */
+function cajaVeredicto(s, d, totalPartidas) {
+  if (!totalPartidas) {
+    return `<div class="veredicto ok">
+      <div class="icono">&#10003;</div>
+      <div>
+        <div class="vt">Ninguna póliza con diferencia</div>
+        <div class="vs">Todos los movimientos cruzaron entre el banco y tus libros.${
+          d.revisar.length ? " Solo quedan " + d.revisar.length + " renglón(es) que conviene confirmar, abajo." : ""
+        } No hay nada que corregir ni capturar.</div>
+      </div></div>`;
+  }
+  const nPol = agruparPorPoliza(d.partidas.filter((x) => x.grupo === "libros")).length;
+  const nPen = d.partidas.filter((x) => x.grupo === "banco").length;
+  const cuenta = [
+    nPol ? `<b>${nPol} póliza(s) por corregir</b>` : "",
+    nPen ? `<b>${nPen} movimiento(s) por capturar</b>` : "",
+  ].filter(Boolean).join(" y ");
+  if (s.cuadra) {
+    return `<div class="veredicto duda">
+      <div class="icono">&#10003;</div>
+      <div>
+        <div class="vt">${totalPartidas} partida(s) que atender</div>
+        <div class="vs">${cuenta}. Con eso queda explicada toda la diferencia entre el banco y tus libros.
+          Abajo está el detalle, póliza por póliza.</div>
+      </div></div>`;
+  }
+  const porUbicar = Math.abs(r2(s.diferencia - d.explicada));
+  return `<div class="veredicto">
+      <div class="icono">!</div>
+      <div>
+        <div class="vt">${totalPartidas} partida(s) que atender</div>
+        <div class="vs">${cuenta}. Además <b>queda algo sin ubicar (${MXN.format(porUbicar)})</b>:
+          revisa que las dos fuentes cubran el mismo periodo y que no falte ningún movimiento en los archivos.</div>
+      </div></div>`;
+}
+
+/* Puente de conciliación: cómo se pasa de los libros al banco, dibujado a escala.
+   La aritmética siempre cierra: libros − (lo que está en libros y no en banco)
+   + (lo que está en banco y no en libros) = banco. Si algo no se puede ubicar,
+   se muestra en su propio renglón en rojo para que el puente cierre igual. */
+function cajaPuente(s, d) {
+  const paso1 = r2(-d.librosTotal);   // quitar de libros lo que el banco no tiene
+  const paso2 = r2(d.bancoTotal);     // sumar lo que el banco tiene y los libros no
+  const parcial = r2(s.librosNeto + paso1 + paso2);
+  const sinUbicar = r2(s.bancoNeto - parcial);
+  const valores = [s.librosNeto, paso1, paso2, sinUbicar, s.bancoNeto];
+  const maxAbs = Math.max(...valores.map((v) => Math.abs(v)), 1);
+  const pct = (v) => Math.max(v ? 4 : 0, Math.round(Math.abs(v) / maxAbs * 100));
+  const sgn = (v) => (v < 0 ? "− " : "+ ") + MXN.format(Math.abs(v));
+  const filas = [];
+  filas.push(`<div class="pr lib"><div class="et">Neto según tus libros</div>
+    <div class="br"><i style="width:${pct(s.librosNeto)}%"></i></div>
+    <div class="im">${MXN.format(s.librosNeto)}</div></div>`);
+  if (d.librosN) filas.push(`<div class="pr menos"><div class="et">En libros y no en banco (${d.librosN})</div>
+    <div class="br"><i style="width:${pct(paso1)}%"></i></div>
+    <div class="im">${sgn(paso1)}</div></div>`);
+  if (d.bancoN) filas.push(`<div class="pr mas"><div class="et">En banco y no en libros (${d.bancoN})</div>
+    <div class="br"><i style="width:${pct(paso2)}%"></i></div>
+    <div class="im">${sgn(paso2)}</div></div>`);
+  if (Math.abs(sinUbicar) > 0.01) filas.push(`<div class="pr ubica"><div class="et">Sin ubicar todavía</div>
+    <div class="br"><i style="width:${pct(sinUbicar)}%"></i></div>
+    <div class="im">${sgn(sinUbicar)}</div></div>`);
+  filas.push(`<div class="pr banco total"><div class="et">Neto según el banco</div>
+    <div class="br"><i style="width:${pct(s.bancoNeto)}%"></i></div>
+    <div class="im">${MXN.format(s.bancoNeto)}</div></div>`);
+  return `<div class="puente">
+    <div class="ptit">Puente de conciliación — cómo se pasa de tus libros al banco</div>
+    ${filas.join("")}
+    <div class="pnota">Las barras están a escala: el renglón más largo es el que más pesa en la diferencia.</div>
+  </div>`;
+}
+
+function renderDiferencias() {
+  const box = $("difBox");
+  if (!result) { box.hidden = true; return; }
+  const s = result.summary;
+  const d = analizarDiferencias();
+  box.hidden = false;
+  const totalPartidas = d.partidas.length;
+  const pendientes = d.partidas.filter((x) => x.grupo === "banco");
+  const porCorregir = agruparPorPoliza(d.partidas.filter((x) => x.grupo === "libros"));
+
+  box.className = "difbox" + (totalPartidas ? "" : " ok");
+
+  // 1º: qué pólizas hay que atender, en tarjetas
+  let html = cajaVeredicto(s, d, totalPartidas);
+  html += seccionTarjetas("Pendientes de capturar en tus libros",
+    pendientes.length + " movimiento(s)",
+    pendientes.slice(0, 12).map((x) => tarjetaPoliza(
+      { poliza: "", movs: [x], comparable: x.comparable }, "banco",
+      () => "El banco ya lo aplicó · falta capturarlo en tu auxiliar")));
+  if (pendientes.length > 12) {
+    html += `<p class="mas">Se muestran 12 de ${pendientes.length}; todas vienen en el Excel.</p>`;
+  }
+  html += seccionTarjetas("Pólizas por corregir",
+    porCorregir.length + " póliza(s) · " + d.librosN + " movimiento(s)",
+    porCorregir.map((g) => tarjetaPoliza(g, "libros",
+      (n) => n > 1 ? "Revisar: " + n + " movimientos no aparecen en el banco" : "Revisar: no aparece en el banco")));
+  html += seccionRevisar(d.revisar);
+
+  if (!totalPartidas) {
+    html += `<p class="mas">No hay pólizas por corregir ni movimientos por capturar.</p>`;
+  }
+
+  // 2º: el detalle y los saldos, guardados para quien los necesite
+  if (totalPartidas) {
+    const conteo = `${totalPartidas} partida${totalPartidas === 1 ? "" : "s"}`;
+    html += `<details class="difmas"><summary>Ver la tabla completa de las ${conteo}</summary>
+      <div class="cuerpo">
+        <table class="dif">
+          <thead><tr>
+            <th></th><th>Dónde está</th><th>Fecha</th><th>Concepto</th><th style="text-align:right">Importe</th>
+            <th>N&deg; póliza</th><th>Qué revisar</th><th></th>
+          </tr></thead>
+          <tbody>${d.partidas.slice(0, 400).map((x, i) => filaDif(x, i + 1, Math.abs(d.partidas[0].comparable))).join("")}</tbody>
+        </table>
+      </div></details>`;
+  }
+  if (Math.abs(d.explicada) > 0.01 || Math.abs(s.diferencia) > 0.01) {
+    html += `<details class="difmas"><summary>Ver el puente de conciliación (saldos y totales)</summary>
+      <div class="cuerpo">${cajaPuente(s, d)}</div></details>`;
+  }
+  html += `<p class="mas" id="irAviso" hidden></p>`;
+  box.innerHTML = html;
+
+  box.querySelectorAll("[data-ir]").forEach((b) =>
+    b.addEventListener("click", () => irARenglon(b.dataset.ir)));
+}
+
+/* Tarjetas por póliza: cada tarjeta responde «¿qué póliza?» y «¿qué hago?».
+   Es lo que se necesita ver de golpe, sin saldos ni totales. */
+function agruparPorPoliza(lista) {
+  const m = new Map();
+  lista.forEach((x) => {
+    const k = x.poliza || "(sin póliza)";
+    if (!m.has(k)) m.set(k, { poliza: x.poliza || "", movs: [], comparable: 0 });
+    const g = m.get(k);
+    g.movs.push(x);
+    g.comparable += x.comparable;
+  });
+  return [...m.values()].sort((a, b) => Math.abs(b.comparable) - Math.abs(a.comparable));
+}
+
+function movDeTarjeta(x) {
+  const imp = x.cargo ? "Cargo " + MXN.format(x.cargo) : (x.abono ? "Abono " + MXN.format(x.abono) : "");
+  return `<div class="polmov">
+      <span class="f">${esc(x.fecha || "sin fecha")}</span> · <b>${esc(x.desc || "")}</b>
+      <span class="imp">${esc(imp)}</span>
+      <button class="irlink" data-ir="${esc(x.id)}">Ver renglón</button>
+    </div>`;
+}
+
+function tarjetaPoliza(g, clase, accion) {
+  const n = g.movs.length;
+  return `<div class="polcard ${clase}">
+    <div class="polnum">${g.poliza ? esc(g.poliza) : "SIN PÓLIZA"}</div>
+    <div class="polacc">${esc(accion(n))}</div>
+    ${g.movs.slice(0, 6).map(movDeTarjeta).join("")}
+    ${n > 6 ? `<div class="polmov" style="color:#94a3b8">…y ${n - 6} movimiento(s) más de esta póliza</div>` : ""}
+  </div>`;
+}
+
+function seccionTarjetas(titulo, conteo, tarjetas) {
+  if (!tarjetas.length) return "";
+  return `<div class="polcat">
+    <h3 class="pcat">${esc(titulo)} <span class="conteo">${esc(conteo)}</span></h3>
+    <div class="polgrid">${tarjetas.join("")}</div>
+  </div>`;
+}
+
+function seccionRevisar(lista) {
+  const TOPE = 10;
+  return seccionTarjetas("Para revisar", lista.length + " renglón(es) que sí cruzaron",
+    lista.slice(0, TOPE).map((x) => tarjetaPoliza(
+      { poliza: x.poliza, movs: [x], comparable: x.comparable }, "revisar",
+      () => "Cruzado con " + Math.abs(x.dias) + " día(s) de diferencia")));
+}
+
+/* Lleva la vista al renglón exacto dentro de la tabla grande y lo deja resaltado. */
+function irARenglon(id) {
+  let el = document.getElementById(id);
+  if (!el && $("onlyDiff").checked) {
+    // El filtro lo estaba escondiendo: lo quitamos para poder mostrarlo.
+    $("onlyDiff").checked = false; onlyDiff = false; renderResult();
+    el = document.getElementById(id);
+  }
+  if (!el) {
+    const av = $("irAviso");
+    if (av) {
+      av.hidden = false;
+      av.textContent = "Ese renglón no está en la tabla (solo se muestran los primeros 4,000). " +
+                       "Lo tienes completo en el Excel y en el CSV descargados.";
+    }
+    return;
+  }
+  const av = $("irAviso");
+  if (av) av.hidden = true;
+  el.scrollIntoView({ block: "center", behavior: "smooth" });
+  el.classList.add("foco");
+  setTimeout(() => el.classList.remove("foco"), 3200);
+}
 
 function renderResult() {
   const panel = $("resultPanel");
@@ -1317,6 +1675,8 @@ function renderResult() {
     [`Diferencia banco − libros`, MXN.format(s.diferencia), s.cuadra ? "good" : "bad"],
     [`Explicada por lo no conciliado`, MXN.format(Math.abs(s.explicada)), s.cuadra ? "good" : "bad"],
   ].map(([k, v, cls]) => `<div class="tile ${cls}">${k}<b>${typeof v === "number" ? v : v}</b></div>`).join("");
+
+  renderDiferencias();
 
   const rows = onlyDiff ? result.pairs.filter((p) => p.estado !== "conciliado") : result.pairs;
   const wrap = $("tableWrap");
@@ -1341,7 +1701,7 @@ function renderResult() {
         </tr>
       </thead>
       <tbody>` + rows.slice(0, 4000).map((p) => `
-        <tr class="est-${p.estado}">
+        <tr class="est-${p.estado}" id="${p._id}">
           <td><span class="tag">${ESTADOS[p.estado] || p.estado}</span></td>
           <td>${esc(p.fechaBanco || "")}</td>
           <td class="desc">${esc(p.descBanco || "")}</td>
@@ -1359,7 +1719,7 @@ function renderResult() {
 
   const warns = [];
   if (s.cuadra) warns.push("La diferencia entre banco y libros queda explicada por los renglones no conciliados: la conciliación cierra.");
-  else warns.push(`La diferencia entre banco y libros (${MXN.format(s.diferencia)}) NO queda explicada por lo no conciliado (${MXN.format(Math.abs(s.explicada))}). Revisa las tolerancias o busca partidas faltantes.`);
+  else warns.push(`La diferencia entre banco y libros (${MXN.format(s.diferencia)}) NO queda explicada por lo no conciliado (${MXN.format(Math.abs(s.explicada))}). Revisa las tolerancias o busca partidas faltantes: el bloque de arriba te dice exactamente qué renglones quedaron sin cruzar.`);
   if (s.posibles) warns.push(`${s.posibles} movimiento(s) se cruzaron con una fecha lejana (más de la tolerancia, hasta 45 días): probablemente sean partidas en tránsito; el renglón muestra los días de diferencia.`);
   if (s.mismoSentido) warns.push(`${s.mismoSentido} movimiento(s) conciliado(s) tienen el MISMO sentido en banco y libros. Si tu auxiliar espejea la cuenta de bancos (lo normal), revisa esos renglones o cambia "Signo en libros".`);
   if (s.espejo) warns.push(`${s.espejo} pares van en sentido espejo, que es lo normal cuando los libros se llevan desde la cuenta de bancos.`);
@@ -1381,6 +1741,39 @@ function outAoA() {
     p.cargoLibros || "", p.abonoLibros || "", p.dias == null ? "" : p.dias, p.poliza || "",
   ]);
   return [OUT_COLS].concat(rows);
+}
+
+/* Hoja solo con lo que hay que corregir: es la que se manda al cliente o al
+   contador, en vez de la tabla completa de miles de renglones. */
+function difAoA() {
+  const d = analizarDiferencias();
+  const cols = ["#", "Dónde está", "Fecha", "Concepto", "Cargo (según su fuente)",
+                "Abono (según su fuente)", "Efecto en la conciliación", "N° póliza",
+                "Días de diferencia", "Qué revisar"];
+  if (!d) return [cols];
+  const out = [
+    ["DIFERENCIAS DETECTADAS EN LA CONCILIACIÓN"],
+    ["Documento", "Movimientos que no se cruzaron entre banco y libros"],
+    [],
+    ["En banco y no en libros", d.bancoN + " movimiento(s)", d.bancoTotal],
+    ["En libros y no en banco", d.librosN + " movimiento(s)", d.librosTotal],
+    ["Total que explican de la diferencia", d.explicada, ""],
+    ["Pólizas por revisar", d.polizas.length ? d.polizas.join(", ") : "(ninguna)"],
+    [],
+    cols,
+  ];
+  d.partidas.forEach((x, i) => {
+    out.push([i + 1, x.lado, x.fecha || "sin fecha", x.desc || "", x.cargo || "",
+              x.abono || "", x.comparable, x.poliza || "", "", x.accion]);
+  });
+  if (d.revisar.length) {
+    out.push([], ["PARA REVISAR (se cruzaron, pero conviene confirmarlos)"], cols);
+    d.revisar.forEach((x, i) => {
+      out.push([i + 1, x.lado, x.fecha || "sin fecha", x.desc || "", x.cargo || "",
+                x.abono || "", x.comparable, x.poliza || "", x.dias == null ? "" : x.dias, x.accion]);
+    });
+  }
+  return out;
 }
 
 function summaryAoA() {
@@ -1423,6 +1816,10 @@ $("dlXlsx").addEventListener("click", () => {
   const ws2 = XLSX.utils.aoa_to_sheet(summaryAoA());
   ws2["!cols"] = [{ wch: 34 }, { wch: 18 }];
   XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
+  const wsDif = XLSX.utils.aoa_to_sheet(difAoA());
+  wsDif["!cols"] = [{ wch: 5 }, { wch: 26 }, { wch: 12 }, { wch: 42 }, { wch: 16 },
+                    { wch: 16 }, { wch: 20 }, { wch: 12 }, { wch: 10 }, { wch: 70 }];
+  XLSX.utils.book_append_sheet(wb, wsDif, "Diferencias");
   XLSX.writeFile(wb, "conciliacion-bancaria.xlsx");
 });
 
